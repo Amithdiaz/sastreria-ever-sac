@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% block title %}Nuevo Pedido — Sastrería Ever S.A.C.{% endblock %}
+
+{% block content %}
+<main class="page-container">
+    <div class="page-header">
+        <div>
+            <h1>Nuevo Pedido Completo</h1>
+            <p>Registra cliente, tela, prenda, corte, medidas obligatorias y comprobante en un solo flujo.</p>
+        </div>
+        <a href="{{ url_for('pedidos') }}" class="btn btn-light btn-sm">Ir a Pedidos</a>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    {% if exito %}
+    <div class="alert alert-success">{{ exito }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('nuevo_pedido') }}" class="form-stack">
+        <div class="panel-card">
+            <div class="panel-title">
+                <span class="step-pill">1</span>
+                <h2>Cliente, Prenda y Tela</h2>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="field">
+                    <label for="id_cliente">Cliente</label>
+                    <select id="id_cliente" name="id_cliente" required>
+                        <option value="">Selecciona un cliente...</option>
+                        {% for c in clientes %}
+                        <option value="{{ c[0] }}" {% if form_data.get('id_cliente')|string == c[0]|string %}selected{% endif %}>
+                            {{ c[2] }} — {{ c[3] }} ({{ c[1] }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="id_tela">Tela en Inventario</label>
+                    <select id="id_tela" name="id_tela" required>
+                        <option value="">Selecciona una tela...</option>
+                        {% for t in telas %}
+                        <option value="{{ t[0] }}" data-precio="{{ t[4] }}" {% if form_data.get('id_tela')|string == t[0]|string %}selected{% endif %}>
+                            {{ t[1] }} | {{ t[2] }} ({{ t[3] }}) — S/ {{ "%.2f"|format(t[4]|float) }}/m (Stock: {{ "%.2f"|format(t[5]|float) }}m)
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid-4">
+                <div class="field">
+                    <label for="tipo_prenda">Tipo de Prenda</label>
+                    <select id="tipo_prenda" name="tipo_prenda" required>
+                        <option value="">Selecciona...</option>
+                        {% for p in prendas %}
+                        <option value="{{ p }}" {% if form_data.get('tipo_prenda') == p %}selected{% endif %}>{{ p }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="tipo_corte">Tipo de Corte</label>
+                    <select id="tipo_corte" name="tipo_corte" required>
+                        <option value="">Selecciona...</option>
+                        {% for corte in cortes %}
+                        <option value="{{ corte }}" {% if form_data.get('tipo_corte') == corte %}selected{% endif %}>{{ corte }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="metros_requeridos">Metros Requeridos</label>
+                    <input id="metros_requeridos" name="metros_requeridos" type="number" step="0.01" min="0.01"
+                           placeholder="Ej. 3.20" value="{{ form_data.get('metros_requeridos', '') }}" required>
+                </div>
+
+                <div class="field">
+                    <label for="fecha_entrega">Fecha de Entrega</label>
+                    <input id="fecha_entrega" name="fecha_entrega" type="date"
+                           value="{{ form_data.get('fecha_entrega', '') }}" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-card">
+            <div class="panel-title">
+                <span class="step-pill">2</span>
+                <h2>Medidas Corporales (cm)</h2>
+            </div>
+            <p class="helper-text">
+                Pantalón exige Cintura y Largo Pantalón; Saco exige medidas superiores; Terno exige las 6 medidas.
+            </p>
+
+            <div class="form-grid-3">
+                <div class="field">
+                    <label for="largo_saco">Largo Saco (cm)</label>
+                    <input id="largo_saco" name="largo_saco" type="number" step="0.01" placeholder="Ej. 72.0"
+                           value="{{ form_data.get('largo_saco', '') }}">
+                </div>
+
+                <div class="field">
+                    <label for="pecho">Pecho (cm)</label>
+                    <input id="pecho" name="pecho" type="number" step="0.01" placeholder="Ej. 98.0"
+                           value="{{ form_data.get('pecho', '') }}">
+                </div>
+
+                <div class="field">
+                    <label for="cintura">Cintura (cm)</label>
+                    <input id="cintura" name="cintura" type="number" step="0.01" placeholder="Ej. 84.0"
+                           value="{{ form_data.get('cintura', '') }}">
+                </div>
+
+                <div class="field">
+                    <label for="hombros">Hombros (cm)</label>
+                    <input id="hombros" name="hombros" type="number" step="0.01" placeholder="Ej. 45.0"
+                           value="{{ form_data.get('hombros', '') }}">
+                </div>
+
+                <div class="field">
+                    <label for="largo_manga">Largo Manga (cm)</label>
+                    <input id="largo_manga" name="largo_manga" type="number" step="0.01" placeholder="Ej. 62.0"
+                           value="{{ form_data.get('largo_manga', '') }}">
+                </div>
+
+                <div class="field">
+                    <label for="largo_pantalon">Largo Pantalón (cm)</label>
+                    <input id="largo_pantalon" name="largo_pantalon" type="number" step="0.01" placeholder="Ej. 102.0"
+                           value="{{ form_data.get('largo_pantalon', '') }}">
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="observaciones">Observaciones de Confección</label>
+                <input id="observaciones" name="observaciones" type="text" maxlength="200"
+                       placeholder="Ej. Solapa clásica, basta con vuelta, prueba previa..."
+                       value="{{ form_data.get('observaciones', '') }}">
+            </div>
+        </div>
+
+        <div class="panel-card">
+            <div class="panel-title">
+                <span class="step-pill">3</span>
+                <h2>Mano de Obra y Comprobante</h2>
+            </div>
+
+            <div class="form-grid-4">
+                <div class="field">
+                    <label for="mano_obra">Mano de Obra (S/)</label>
+                    <input id="mano_obra" name="mano_obra" type="number" step="0.01" min="0"
+                           value="{{ form_data.get('mano_obra', '120.00') }}" required>
+                </div>
+
+                <div class="field">
+                    <label for="tipo_comprobante">Tipo Comprobante</label>
+                    <select id="tipo_comprobante" name="tipo_comprobante" required>
+                        {% for tc in tipos_comprobante %}
+                        <option value="{{ tc }}" {% if form_data.get('tipo_comprobante') == tc %}selected{% endif %}>{{ tc }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="serie_numero">Serie y Número</label>
+                    <input id="serie_numero" name="serie_numero" type="text" maxlength="20"
+                           placeholder="Ej. B001-009999" value="{{ form_data.get('serie_numero', '') }}" required>
+                </div>
+
+                <div class="field">
+                    <label for="medio_pago">Medio de Pago</label>
+                    <select id="medio_pago" name="medio_pago" required>
+                        {% for mp in medios_pago %}
+                        <option value="{{ mp }}" {% if form_data.get('medio_pago') == mp %}selected{% endif %}>{{ mp }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="estimate-box">
+                <span>Estimado referencial (con IGV 18%):</span>
+                <strong id="estimado-total">S/ 0.00</strong>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Guardar Pedido Completo</button>
+                <a href="{{ url_for('menu') }}" class="btn btn-light">Cancelar</a>
+            </div>
+        </div>
+    </form>
+</main>
+
+<script>
+(function () {
+    const telaSel = document.getElementById("id_tela");
+    const metrosInp = document.getElementById("metros_requeridos");
+    const manoInp = document.getElementById("mano_obra");
+    const estTotal = document.getElementById("estimado-total");
+
+    function actualizarEstimado() {
+        const opt = telaSel.options[telaSel.selectedIndex];
+        const precio = opt ? parseFloat(opt.getAttribute("data-precio") || "0") : 0;
+        const metros = parseFloat(metrosInp.value || "0");
+        const mano = parseFloat(manoInp.value || "0");
+        const sub = (metros > 0 ? metros * precio : 0) + (mano >= 0 ? mano : 0);
+        const total = sub * 1.18;
+        estTotal.textContent = "S/ " + (isNaN(total) ? "0.00" : total.toFixed(2));
+    }
+
+    telaSel.addEventListener("change", actualizarEstimado);
+    metrosInp.addEventListener("input", actualizarEstimado);
+    manoInp.addEventListener("input", actualizarEstimado);
+    actualizarEstimado();
+})();
+</script>
+{% endblock %}

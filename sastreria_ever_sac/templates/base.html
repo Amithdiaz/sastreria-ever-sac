@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sastrería Ever S.A.C.{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% if session.get("logged_in") %}
+    <nav class="navbar">
+        <div class="brand-group">
+            <span class="brand-badge">EVER SAC</span>
+            <span class="brand-title">Sastrería Ever — Gestión Integral</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="{{ url_for('menu') }}" class="nav-link {% if active_page == 'menu' %}active{% endif %}">Menú</a>
+            <a href="{{ url_for('nuevo_pedido') }}" class="nav-link {% if active_page == 'nuevo_pedido' %}active{% endif %}">Nuevo Pedido</a>
+            <a href="{{ url_for('pedidos') }}" class="nav-link {% if active_page == 'pedidos' %}active{% endif %}">Pedidos</a>
+            <a href="{{ url_for('inventario') }}" class="nav-link {% if active_page == 'inventario' %}active{% endif %}">Telas</a>
+            <a href="{{ url_for('comprobantes') }}" class="nav-link {% if active_page == 'comprobantes' %}active{% endif %}">Comprobantes</a>
+            <a href="{{ url_for('auditoria') }}" class="nav-link {% if active_page == 'auditoria' %}active{% endif %}">Auditoría</a>
+        </div>
+
+        <div class="nav-user">
+            <span>{{ session.get("display_user") }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-logout">Salir</a>
+        </div>
+    </nav>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</body>
+</html>

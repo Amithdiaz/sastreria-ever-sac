@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Menú Principal — Sastrería Ever S.A.C.{% endblock %}
+
+{% block content %}
+<main class="page-container">
+    <div class="page-header">
+        <div>
+            <h1>Panel Principal</h1>
+            <p>Flujo por secciones conectado a SastreriaEverDB.</p>
+        </div>
+        <a href="{{ url_for('nuevo_pedido') }}" class="btn btn-primary">+ Registrar Nuevo Pedido</a>
+    </div>
+
+    <div class="menu-grid">
+        <div class="menu-card">
+            <div>
+                <div class="menu-step">Paso 1 · Registro</div>
+                <h2>Nuevo Pedido Completo</h2>
+                <p>Crea un pedido con cliente, tela, prenda, corte, medidas obligatorias y comprobante.</p>
+            </div>
+            <a href="{{ url_for('nuevo_pedido') }}" class="btn btn-dark btn-sm">Abrir formulario</a>
+        </div>
+
+        <div class="menu-card">
+            <div>
+                <div class="menu-step">Paso 2 · Seguimiento</div>
+                <h2>Pedidos, Medidas y Estados</h2>
+                <p>Filtra pedidos, revisa medidas tomadas y cambia estados (incluyendo Anulado).</p>
+            </div>
+            <a href="{{ url_for('pedidos') }}" class="btn btn-light btn-sm">Gestionar pedidos</a>
+        </div>
+
+        <div class="menu-card">
+            <div>
+                <div class="menu-step">Paso 3 · Stock</div>
+                <h2>Inventario de Telas</h2>
+                <p>Consulta el metraje disponible y verifica la reposición al anular pedidos.</p>
+            </div>
+            <a href="{{ url_for('inventario') }}" class="btn btn-light btn-sm">Ver inventario</a>
+        </div>
+
+        <div class="menu-card">
+            <div>
+                <div class="menu-step">Paso 4 · Facturación</div>
+                <h2>Comprobantes</h2>
+                <p>Revisa boletas y facturas emitidas con subtotal, IGV y total a pagar.</p>
+            </div>
+            <a href="{{ url_for('comprobantes') }}" class="btn btn-light btn-sm">Ver comprobantes</a>
+        </div>
+
+        <div class="menu-card">
+            <div>
+                <div class="menu-step">Paso 5 · Control</div>
+                <h2>Auditoría y Conteo</h2>
+                <p>Observa el conteo de registros por tabla y los movimientos en Auditoria_Pedidos.</p>
+            </div>
+            <a href="{{ url_for('auditoria') }}" class="btn btn-light btn-sm">Ver auditoría</a>
+        </div>
+    </div>
+</main>
+{% endblock %}

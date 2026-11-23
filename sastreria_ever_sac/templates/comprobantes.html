@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Comprobantes — Sastrería Ever S.A.C.{% endblock %}
+
+{% block content %}
+<main class="page-container">
+    <div class="page-header">
+        <div>
+            <h1>Comprobantes Emitidos</h1>
+            <p>Boletas y facturas generadas con cálculo de IGV (18%) mediante <code>dbo.fn_CalcularIGV</code>.</p>
+        </div>
+        <a href="{{ url_for('nuevo_pedido') }}" class="btn btn-primary btn-sm">+ Nuevo Pedido</a>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    <div class="panel-card">
+        <form method="GET" action="{{ url_for('comprobantes') }}" class="filter-bar">
+            <div class="field filter-grow">
+                <label for="filtro">Buscar por Serie, Cliente, Documento o #Pedido</label>
+                <input id="filtro" name="filtro" type="text" placeholder="Ej. B001, Carlos o 41258901" value="{{ filtro }}">
+            </div>
+
+            <div class="field filter-state">
+                <label for="tipo">Tipo Comprobante</label>
+                <select id="tipo" name="tipo">
+                    <option value="">Todos</option>
+                    {% for tc in tipos_comprobante %}
+                    <option value="{{ tc }}" {% if tipo_filtro == tc %}selected{% endif %}>{{ tc }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-buttons">
+                <button type="submit" class="btn btn-dark btn-sm">Filtrar</button>
+                <a href="{{ url_for('comprobantes') }}" class="btn btn-light btn-sm">Limpiar</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="panel-card table-card">
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Serie / Número</th>
+                        <th>Tipo</th>
+                        <th>#Pedido</th>
+                        <th>Cliente</th>
+                        <th>Subtotal</th>
+                        <th>IGV (18%)</th>
+                        <th>Total</th>
+                        <th>Medio Pago</th>
+                        <th>Fecha Emisión</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in comprobantes %}
+                    <tr>
+                        <td><strong>{{ c[1] }}</strong></td>
+                        <td>
+                            <span class="badge {% if c[2] == 'Factura' %}badge-warn{% else %}badge-success{% endif %}">
+                                {{ c[2] }}
+                            </span>
+                        </td>
+                        <td>#{{ c[3] }}</td>
+                        <td>
+                            <div class="cell-main">{{ c[4] }}</div>
+                            <div class="cell-sub">{{ c[5] }}</div>
+                        </td>
+                        <td>S/ {{ "%.2f"|format(c[6]|float) }}</td>
+                        <td>S/ {{ "%.2f"|format(c[7]|float) }}</td>
+                        <td><strong>S/ {{ "%.2f"|format(c[8]|float) }}</strong></td>
+                        <td><span class="cell-sub">{{ c[9] }}</span></td>
+                        <td><span class="cell-sub">{{ c[10] }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="empty-row">No hay comprobantes que coincidan con el filtro.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+{% endblock %}

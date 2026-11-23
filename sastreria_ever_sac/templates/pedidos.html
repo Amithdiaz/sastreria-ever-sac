@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Pedidos, Medidas y Estados — Sastrería Ever S.A.C.{% endblock %}
+
+{% block content %}
+<main class="page-container">
+    <div class="page-header">
+        <div>
+            <h1>Pedidos, Medidas y Estados</h1>
+            <p>Busca pedidos, inspecciona las medidas corporales y actualiza el estado de confección.</p>
+        </div>
+        <a href="{{ url_for('nuevo_pedido') }}" class="btn btn-primary btn-sm">+ Nuevo Pedido</a>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    {% if exito %}
+    <div class="alert alert-success">{{ exito }}</div>
+    {% endif %}
+
+    <div class="panel-card">
+        <form method="GET" action="{{ url_for('pedidos') }}" class="filter-bar">
+            <div class="field filter-grow">
+                <label for="filtro">Buscar por Cliente, DNI/RUC o #Pedido</label>
+                <input id="filtro" name="filtro" type="text" placeholder="Ej. Carlos, 41258901 o 15" value="{{ filtro }}">
+            </div>
+
+            <div class="field filter-state">
+                <label for="estado">Estado</label>
+                <select id="estado" name="estado">
+                    <option value="">Todos los estados</option>
+                    {% for est in estados %}
+                    <option value="{{ est }}" {% if estado_filtro == est %}selected{% endif %}>{{ est }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-buttons">
+                <button type="submit" class="btn btn-dark btn-sm">Filtrar</button>
+                <a href="{{ url_for('pedidos') }}" class="btn btn-light btn-sm">Limpiar</a>
+            </div>
+        </form>
+    </div>
+
+    {% if medidas_detalle %}
+    <div class="panel-card measures-card">
+        <div class="panel-header-inline">
+            <div>
+                <span class="menu-step">MEDIDAS REGISTRADAS</span>
+                <h2>Pedido #{{ medidas_detalle[0] }} — {{ medidas_detalle[1] }}</h2>
+                <p class="helper-text">
+                    Prenda: <strong>{{ medidas_detalle[2] }}</strong> ·
+                    Corte: <strong>{{ medidas_detalle[3] }}</strong> ·
+                    Estado actual: <strong>{{ medidas_detalle[4] }}</strong>
+                </p>
+            </div>
+            <a href="{{ url_for('pedidos', filtro=filtro, estado=estado_filtro) }}" class="btn btn-light btn-sm">Cerrar medidas</a>
+        </div>
+
+        <div class="measures-grid">
+            <div class="measure-item"><span>Largo Saco</span><strong>{{ medidas_detalle[5] if medidas_detalle[5] is not none else "—" }} cm</strong></div>
+            <div class="measure-item"><span>Pecho</span><strong>{{ medidas_detalle[6] if medidas_detalle[6] is not none else "—" }} cm</strong></div>
+            <div class="measure-item"><span>Cintura</span><strong>{{ medidas_detalle[7] if medidas_detalle[7] is not none else "—" }} cm</strong></div>
+            <div class="measure-item"><span>Hombros</span><strong>{{ medidas_detalle[8] if medidas_detalle[8] is not none else "—" }} cm</strong></div>
+            <div class="measure-item"><span>Largo Manga</span><strong>{{ medidas_detalle[9] if medidas_detalle[9] is not none else "—" }} cm</strong></div>
+            <div class="measure-item"><span>Largo Pantalón</span><strong>{{ medidas_detalle[10] if medidas_detalle[10] is not none else "—" }} cm</strong></div>
+        </div>
+
+        <div class="obs-box">
+            <span>Observaciones:</span> {{ medidas_detalle[11] or "Sin observaciones registradas." }}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="panel-card table-card">
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#ID</th>
+                        <th>Cliente</th>
+                        <th>Prenda / Corte</th>
+                        <th>Tela</th>
+                        <th>Metros</th>
+                        <th>Entrega</th>
+                        <th>Comprobante / Total</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pedidos %}
+                    {% set st = p[7] %}
+                    <tr>
+                        <td><strong>#{{ p[0] }}</strong></td>
+                        <td>
+                            <div class="cell-main">{{ p[1] }}</div>
+                            <div class="cell-sub">{{ p[2] }}</div>
+                        </td>
+                        <td>
+                            <div class="cell-main">{{ p[4] }}</div>
+                            <div class="cell-sub">{{ p[5] }}</div>
+                        </td>
+                        <td><span class="cell-sub">{{ p[3] }}</span></td>
+                        <td>{{ "%.2f"|format(p[6]|float) }} m</td>
+                        <td>{{ p[8] }}</td>
+                        <td>
+                            <div class="cell-main">S/ {{ "%.2f"|format(p[12]|float) }}</div>
+                            <div class="cell-sub">{{ p[9] }} · IGV: S/ {{ "%.2f"|format(p[11]|float) }}</div>
+                        </td>
+                        <td>
+                            <span class="badge
+                                {% if st == 'Entregado' or st == 'Terminado' %}badge-success
+                                {% elif st == 'Anulado' %}badge-danger
+                                {% else %}badge-warn{% endif %}">
+                                {{ st }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-stack">
+                                <a href="{{ url_for('pedidos', filtro=filtro, estado=estado_filtro, medidas_id=p[0]) }}"
+                                   class="btn btn-light btn-xs">Medidas</a>
+
+                                <form method="POST" action="{{ url_for('pedidos', filtro=filtro, estado=estado_filtro) }}" class="inline-state-form">
+                                    <input type="hidden" name="accion" value="cambiar_estado">
+                                    <input type="hidden" name="id_pedido" value="{{ p[0] }}">
+                                    <select name="nuevo_estado" class="select-xs" aria-label="Nuevo estado para pedido {{ p[0] }}">
+                                        {% for est in estados %}
+                                        <option value="{{ est }}" {% if est == st %}selected{% endif %}>{{ est }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn btn-dark btn-xs">Cambiar</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="empty-row">No se encontraron pedidos con el filtro aplicado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+{% endblock %}

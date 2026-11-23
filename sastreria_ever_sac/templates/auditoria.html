@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Auditoría y Conteo — Sastrería Ever S.A.C.{% endblock %}
+
+{% block content %}
+<main class="page-container">
+    <div class="page-header">
+        <div>
+            <h1>Auditoría y Conteo de Tablas</h1>
+            <p>Conteo total por tabla (<code>sp_ResumenRegistros</code>) y trazabilidad de <code>trg_AuditoriaPedidos</code>.</p>
+        </div>
+        <a href="{{ url_for('pedidos') }}" class="btn btn-light btn-sm">Ver Pedidos</a>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    <div class="panel-card">
+        <div class="panel-title">
+            <span class="step-pill">#</span>
+            <h2>Resumen de Registros por Tabla</h2>
+        </div>
+        <div class="summary-grid">
+            {% for r in resumen %}
+            <div class="measure-item">
+                <span>{{ r[0] }}</span>
+                <strong>{{ r[1] }} registros</strong>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel-card table-card">
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID Audit</th>
+                        <th>#Pedido</th>
+                        <th>Acción</th>
+                        <th>Estado Anterior</th>
+                        <th>Estado Nuevo</th>
+                        <th>Usuario SQL</th>
+                        <th>Fecha y Hora</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in auditoria %}
+                    <tr>
+                        <td><strong>#{{ a[0] }}</strong></td>
+                        <td>#{{ a[1] }}</td>
+                        <td>
+                            <span class="badge {% if a[2] == 'INSERT' %}badge-success{% else %}badge-warn{% endif %}">
+                                {{ a[2] }}
+                            </span>
+                        </td>
+                        <td><span class="cell-sub">{{ a[3] or "—" }}</span></td>
+                        <td>
+                            <span class="badge {% if a[4] == 'Anulado' %}badge-danger{% else %}badge-success{% endif %}">
+                                {{ a[4] or "—" }}
+                            </span>
+                        </td>
+                        <td><span class="cell-sub">{{ a[5] }}</span></td>
+                        <td><span class="cell-sub">{{ a[6] }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="empty-row">No hay registros de auditoría disponibles.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+{% endblock %}

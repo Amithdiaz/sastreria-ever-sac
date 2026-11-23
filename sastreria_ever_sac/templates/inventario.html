@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Inventario de Telas — Sastrería Ever S.A.C.{% endblock %}
+
+{% block content %}
+<main class="page-container">
+    <div class="page-header">
+        <div>
+            <h1>Inventario de Telas</h1>
+            <p>Registra rollos, suma metraje, actualiza precios y verifica descuentos o reposiciones por pedidos.</p>
+        </div>
+        <a href="{{ url_for('nuevo_pedido') }}" class="btn btn-primary btn-sm">+ Nuevo Pedido</a>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    {% if exito %}
+    <div class="alert alert-success">{{ exito }}</div>
+    {% endif %}
+
+    <div class="form-grid-2">
+        <div class="panel-card">
+            <div class="panel-title">
+                <span class="step-pill">+</span>
+                <h2>Registrar Nueva Tela</h2>
+            </div>
+            <form method="POST" action="{{ url_for('inventario') }}">
+                <input type="hidden" name="accion" value="registrar_tela">
+                <div class="form-grid-2">
+                    <div class="field">
+                        <label for="codigo_tela">Código de Tela</label>
+                        <input id="codigo_tela" name="codigo_tela" type="text" maxlength="20" placeholder="Ej. ROLL-09999" required>
+                    </div>
+                    <div class="field">
+                        <label for="color">Color</label>
+                        <input id="color" name="color" type="text" maxlength="30" placeholder="Ej. Azul Marino" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="nombre_tela">Nombre / Calidad de Tela</label>
+                    <input id="nombre_tela" name="nombre_tela" type="text" maxlength="80" placeholder="Ej. Casimir Barrington Super 130" required>
+                </div>
+                <div class="form-grid-2">
+                    <div class="field">
+                        <label for="precio_metro">Precio por Metro (S/)</label>
+                        <input id="precio_metro" name="precio_metro" type="number" step="0.01" min="0.01" placeholder="Ej. 150.00" required>
+                    </div>
+                    <div class="field">
+                        <label for="stock_metros">Stock Inicial (m)</label>
+                        <input id="stock_metros" name="stock_metros" type="number" step="0.01" min="0" placeholder="Ej. 60.00" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Guardar Tela</button>
+            </form>
+        </div>
+
+        <div class="panel-card">
+            <div class="panel-title">
+                <span class="step-pill">↻</span>
+                <h2>Agregar Stock y Actualizar Precio</h2>
+            </div>
+            <form method="POST" action="{{ url_for('inventario') }}">
+                <input type="hidden" name="accion" value="actualizar_tela">
+                <div class="field">
+                    <label for="id_tela_upd">Selecciona Tela Activa</label>
+                    <select id="id_tela_upd" name="id_tela" required>
+                        <option value="">Elige una tela...</option>
+                        {% for t in telas %}
+                        <option value="{{ t[0] }}">
+                            #{{ t[0] }} · {{ t[1] }} — {{ t[2] }} ({{ t[3] }}) | Stock: {{ "%.2f"|format(t[5]|float) }}m | S/ {{ "%.2f"|format(t[4]|float) }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-grid-2">
+                    <div class="field">
+                        <label for="metros_adicionales">Metros a Sumar (+m)</label>
+                        <input id="metros_adicionales" name="metros_adicionales" type="number" step="0.01" min="0" value="0.00" required>
+                    </div>
+                    <div class="field">
+                        <label for="nuevo_precio">Nuevo Precio / Metro (S/)</label>
+                        <input id="nuevo_precio" name="nuevo_precio" type="number" step="0.01" min="0.01" placeholder="Ej. 160.00" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-dark btn-full">Actualizar Inventario</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="panel-card table-card">
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Código</th>
+                        <th>Tela</th>
+                        <th>Color</th>
+                        <th>Precio / m</th>
+                        <th>Stock (m)</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in telas %}
+                    <tr>
+                        <td><strong>#{{ t[0] }}</strong></td>
+                        <td><span class="cell-main">{{ t[1] }}</span></td>
+                        <td><span class="cell-main">{{ t[2] }}</span></td>
+                        <td><span class="cell-sub">{{ t[3] }}</span></td>
+                        <td><strong>S/ {{ "%.2f"|format(t[4]|float) }}</strong></td>
+                        <td>
+                            <span class="badge {% if (t[5]|float) <= 10 %}badge-warn{% else %}badge-success{% endif %}">
+                                {{ "%.2f"|format(t[5]|float) }} m
+                            </span>
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('inventario') }}" onsubmit="return confirm('¿Desactivar esta tela del inventario activo?');">
+                                <input type="hidden" name="accion" value="desactivar_tela">
+                                <input type="hidden" name="id_tela" value="{{ t[0] }}">
+                                <button type="submit" class="btn btn-logout btn-xs">Desactivar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="empty-row">No hay telas activas registradas.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+{% endblock %}
